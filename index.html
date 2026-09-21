@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ayurvedic Wellness — Cost Calculator</title>
+  <style>
+    :root {
+      --bg: #f6f4f0;
+      --card: #fff;
+      --ink: #1a1a1a;
+      --muted: #5c5c5c;
+      --line: #ddd6cb;
+      --datapro: #1f4d3a;
+      --third: #6b3f1d;
+      --accent: #2d6a4f;
+      --warn: #9a3412;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--card);
+    }
+    header h1 { margin: 0 0 0.25rem; font-size: 1.25rem; }
+    header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 3rem;
+      display: grid;
+      gap: 1rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+    }
+    .card h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+    .card.datapro h2 { color: var(--datapro); }
+    .card.third h2 { color: var(--third); }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem 1rem;
+      align-items: center;
+      padding: 0.55rem 0;
+      border-top: 1px solid #eee;
+    }
+    .row:first-of-type { border-top: none; }
+    label { color: var(--ink); }
+    .hint { display: block; color: var(--muted); font-size: 0.8rem; margin-top: 0.15rem; }
+    .inputs { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; justify-content: flex-end; }
+    input[type="number"] {
+      width: 7.5rem;
+      padding: 0.35rem 0.45rem;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font: inherit;
+    }
+    input[type="range"] { width: 9rem; accent-color: var(--accent); }
+    .tag {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.1rem 0.45rem;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle input { width: 1.05rem; height: 1.05rem; accent-color: var(--accent); }
+    .totals {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+    .stat {
+      background: #faf8f5;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.75rem 0.85rem;
+    }
+    .stat .k { color: var(--muted); font-size: 0.8rem; margin-bottom: 0.2rem; }
+    .stat .v { font-size: 1.15rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+    .stat.grand { border-color: var(--accent); background: #eef7f1; }
+    .stat.grand .v { color: var(--datapro); }
+    .breakdown { font-size: 0.85rem; color: var(--muted); margin-top: 0.75rem; }
+    .breakdown table { width: 100%; border-collapse: collapse; }
+    .breakdown th, .breakdown td {
+      text-align: left;
+      padding: 0.35rem 0.25rem;
+      border-top: 1px solid #eee;
+      font-variant-numeric: tabular-nums;
+    }
+    .breakdown th { color: var(--muted); font-weight: 560; }
+    .breakdown td.num { text-align: right; }
+    .dm-off { opacity: 0.45; }
+    footer { color: var(--muted); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ayurvedic wellness — cost calculator</h1>
+    <p>Plain math for cut decisions. Amounts in INR. Edit any field; totals update live.</p>
+  </header>
+  <main>
+    <section class="card controls">
+      <label class="toggle">
+        <input type="checkbox" id="includeDm" checked />
+        <span>Include Digital Marketing</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="showAnnual" />
+        <span>Show annual recurring (×12)</span>
+      </label>
+    </section>
+
+    <section class="card datapro">
+      <h2>Datapro — Software</h2>
+      <div class="row">
+        <div>
+          <label for="devOneTime">Development (deploy, config, testing/UAT, initial training)</label>
+          <span class="hint">One-time</span>
+        </div>
+        <div class="inputs">
+          <span class="tag">one-time</span>
+          <input type="number" id="devOneTime" min="0" step="10000" value="1200000" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="maintMonth">Maintenance &amp; technical support</label>
+          <span class="hint">Range guide ₹20,000–₹75,000+/month — default low end</span>
+        </div>
+        <div class="inputs">
+          <span class="tag">monthly</span>
+          <input type="range" id="maintRange" min="20000" max="75000" step="1000" value="20000" />
+          <input type="number" id="maintMonth" min="0" step="1000" value="20000" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card third">
+      <h2>3rd party — Infra</h2>
+      <div class="row">
+        <div>
+          <label for="hostingMonth">Hosting</label>
+          <span class="hint">~₹1,620/month initially</span>
+        </div>
+        <div class="inputs">
+          <span class="tag">monthly</span>
+          <input type="number" id="hostingMonth" min="0" step="10" value="1620" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="domainYear">Domain</label>
+          <span class="hint">₹1,200–₹2,000/year — stored as yearly, shown also as monthly ÷12</span>
+        </div>
+        <div class="inputs">
+          <span class="tag">yearly</span>
+          <input type="number" id="domainYear" min="0" step="100" value="1600" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="storageMonth">Image / media storage</label>
+          <span class="hint">Minimal initially</span>
+        </div>
+        <div class="inputs">
+          <span class="tag">monthly</span>
+          <input type="number" id="storageMonth" min="0" step="10" value="0" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card third" id="dmCard">
+      <h2>3rd party — Digital Marketing (optional)</h2>
+      <div class="row">
+        <div>
+          <label for="dmFeeMonth">DM professional fee</label>
+          <span class="hint">₹90,000–₹2,50,000/month</span>
+        </div>
+        <div class="inputs">
+          <span class="tag">monthly</span>
+          <input type="range" id="dmFeeRange" min="90000" max="250000" step="5000" value="90000" />
+          <input type="number" id="dmFeeMonth" min="0" step="1000" value="90000" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="adsMonth">Advertising spend</label>
+          <span class="hint">₹25,000–₹2,00,000+/month</span>
+        </div>
+        <div class="inputs">
+          <span class="tag">monthly</span>
+          <input type="range" id="adsRange" min="25000" max="200000" step="5000" value="25000" />
+          <input type="number" id="adsMonth" min="0" step="1000" value="25000" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <strong>Combined DM (auto)</strong>
+          <span class="hint">Fee + ads — editable range was ₹1,15,000–₹4,50,000+</span>
+        </div>
+        <div class="inputs">
+          <span class="tag">monthly</span>
+          <strong id="dmCombined" style="font-variant-numeric:tabular-nums">₹0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Totals</h2>
+      <div class="totals">
+        <div class="stat">
+          <div class="k">One-time total</div>
+          <div class="v" id="oneTimeTotal">₹0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Monthly recurring</div>
+          <div class="v" id="monthlyTotal">₹0</div>
+        </div>
+        <div class="stat" id="annualStat" hidden>
+          <div class="k">Annual recurring</div>
+          <div class="v" id="annualTotal">₹0</div>
+        </div>
+        <div class="stat grand">
+          <div class="k">Year-1 all-in (one-time + 12× monthly)</div>
+          <div class="v" id="year1Total">₹0</div>
+        </div>
+      </div>
+      <div class="breakdown">
+        <table>
+          <thead>
+            <tr><th>Bucket</th><th class="num">One-time</th><th class="num">Monthly</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Datapro — Software</td><td class="num" id="subDataproOT">₹0</td><td class="num" id="subDataproM">₹0</td></tr>
+            <tr><td>3rd party — Infra</td><td class="num" id="subInfraOT">₹0</td><td class="num" id="subInfraM">₹0</td></tr>
+            <tr id="subDmRow"><td>3rd party — Digital Marketing</td><td class="num">₹0</td><td class="num" id="subDmM">₹0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      Defaults from proposal notes. Domain yearly cost is converted to monthly as year÷12 for recurring totals.
+      Cut lever: Digital Marketing toggle usually moves the needle most.
+    </footer>
+  </main>
+  <script>
+    const inr = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+    const num = (id) => Number(document.getElementById(id).value) || 0;
+
+    function syncPair(rangeId, numId) {
+      const r = document.getElementById(rangeId);
+      const n = document.getElementById(numId);
+      r.addEventListener("input", () => { n.value = r.value; calc(); });
+      n.addEventListener("input", () => {
+        const v = Number(n.value);
+        if (!Number.isNaN(v)) r.value = Math.min(Math.max(v, Number(r.min)), Number(r.max));
+        calc();
+      });
+    }
+    syncPair("maintRange", "maintMonth");
+    syncPair("dmFeeRange", "dmFeeMonth");
+    syncPair("adsRange", "adsMonth");
+
+    ["devOneTime", "hostingMonth", "domainYear", "storageMonth", "includeDm", "showAnnual"]
+      .forEach((id) => document.getElementById(id).addEventListener("input", calc));
+
+    function calc() {
+      const includeDm = document.getElementById("includeDm").checked;
+      const showAnnual = document.getElementById("showAnnual").checked;
+      document.getElementById("dmCard").classList.toggle("dm-off", !includeDm);
+      document.getElementById("annualStat").hidden = !showAnnual;
+      document.getElementById("subDmRow").style.opacity = includeDm ? "1" : "0.45";
+
+      const devOT = num("devOneTime");
+      const maint = num("maintMonth");
+      const hosting = num("hostingMonth");
+      const domainM = num("domainYear") / 12;
+      const storage = num("storageMonth");
+      const dmFee = num("dmFeeMonth");
+      const ads = num("adsMonth");
+      const dm = dmFee + ads;
+
+      document.getElementById("dmCombined").textContent = inr(dm);
+
+      const dataproOT = devOT;
+      const dataproM = maint;
+      const infraOT = 0;
+      const infraM = hosting + domainM + storage;
+      const dmM = includeDm ? dm : 0;
+
+      const oneTime = dataproOT + infraOT;
+      const monthly = dataproM + infraM + dmM;
+      const annual = monthly * 12;
+      const year1 = oneTime + annual;
+
+      document.getElementById("oneTimeTotal").textContent = inr(oneTime);
+      document.getElementById("monthlyTotal").textContent = inr(monthly);
+      document.getElementById("annualTotal").textContent = inr(annual);
+      document.getElementById("year1Total").textContent = inr(year1);
+
+      document.getElementById("subDataproOT").textContent = inr(dataproOT);
+      document.getElementById("subDataproM").textContent = inr(dataproM);
+      document.getElementById("subInfraOT").textContent = inr(infraOT);
+      document.getElementById("subInfraM").textContent = inr(infraM);
+      document.getElementById("subDmM").textContent = inr(dmM);
+    }
+    calc();
+  </script>
+</body>
+</html>
