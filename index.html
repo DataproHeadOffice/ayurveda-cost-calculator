@@ -155,10 +155,10 @@
       <div class="row">
         <div>
           <label for="maintMonth">Maintenance &amp; technical support</label>
-          <span class="hint">Range guide ₹20,000–₹75,000+/month — default low end</span>
+          <span class="hint">Starts after year 1 / when development is complete. Range ₹20,000–₹75,000+/month — default low end. Not in year-1 monthly.</span>
         </div>
         <div class="inputs">
-          <span class="tag">monthly</span>
+          <span class="tag">from year 2</span>
           <input type="range" id="maintRange" min="20000" max="75000" step="1000" value="20000" />
           <input type="number" id="maintMonth" min="0" step="1000" value="20000" />
         </div>
@@ -243,15 +243,19 @@
           <div class="v" id="oneTimeTotal">₹0</div>
         </div>
         <div class="stat">
-          <div class="k">Monthly recurring</div>
+          <div class="k">Monthly during year 1</div>
           <div class="v" id="monthlyTotal">₹0</div>
         </div>
+        <div class="stat">
+          <div class="k">Monthly from year 2 (+ maintenance)</div>
+          <div class="v" id="monthlyY2Total">₹0</div>
+        </div>
         <div class="stat" id="annualStat" hidden>
-          <div class="k">Annual recurring</div>
+          <div class="k">Annual during year 1</div>
           <div class="v" id="annualTotal">₹0</div>
         </div>
         <div class="stat grand">
-          <div class="k">Year-1 all-in (one-time + 12× monthly)</div>
+          <div class="k">Year-1 all-in (one-time + 12× year-1 monthly)</div>
           <div class="v" id="year1Total">₹0</div>
         </div>
       </div>
@@ -261,7 +265,7 @@
             <tr><th>Bucket</th><th class="num">One-time</th><th class="num">Monthly</th></tr>
           </thead>
           <tbody>
-            <tr><td>Datapro — Software</td><td class="num" id="subDataproOT">₹0</td><td class="num" id="subDataproM">₹0</td></tr>
+            <tr><td>Datapro — Software (maint is year-2+)</td><td class="num" id="subDataproOT">₹0</td><td class="num" id="subDataproM">₹0</td></tr>
             <tr><td>3rd party — Infra</td><td class="num" id="subInfraOT">₹0</td><td class="num" id="subInfraM">₹0</td></tr>
             <tr id="subDmRow"><td>3rd party — Digital Marketing</td><td class="num">₹0</td><td class="num" id="subDmM">₹0</td></tr>
           </tbody>
@@ -271,6 +275,7 @@
 
     <footer>
       Defaults from proposal notes. Domain yearly cost is converted to monthly as year÷12 for recurring totals.
+      Maintenance starts after development / year 1 — excluded from year-1 monthly and year-1 all-in.
       Cut lever: Digital Marketing toggle usually moves the needle most.
     </footer>
   </main>
@@ -314,23 +319,27 @@
       document.getElementById("dmCombined").textContent = inr(dm);
 
       const dataproOT = devOT;
-      const dataproM = maint;
+      // Maintenance starts after year 1 / when development is complete
+      const dataproM_y1 = 0;
+      const dataproM_y2 = maint;
       const infraOT = 0;
       const infraM = hosting + domainM + storage;
       const dmM = includeDm ? dm : 0;
 
       const oneTime = dataproOT + infraOT;
-      const monthly = dataproM + infraM + dmM;
-      const annual = monthly * 12;
+      const monthlyY1 = dataproM_y1 + infraM + dmM;
+      const monthlyY2 = dataproM_y2 + infraM + dmM;
+      const annual = monthlyY1 * 12;
       const year1 = oneTime + annual;
 
       document.getElementById("oneTimeTotal").textContent = inr(oneTime);
-      document.getElementById("monthlyTotal").textContent = inr(monthly);
+      document.getElementById("monthlyTotal").textContent = inr(monthlyY1);
+      document.getElementById("monthlyY2Total").textContent = inr(monthlyY2);
       document.getElementById("annualTotal").textContent = inr(annual);
       document.getElementById("year1Total").textContent = inr(year1);
 
       document.getElementById("subDataproOT").textContent = inr(dataproOT);
-      document.getElementById("subDataproM").textContent = inr(dataproM);
+      document.getElementById("subDataproM").textContent = inr(dataproM_y1) + " (y1) / " + inr(dataproM_y2) + " (y2+)";
       document.getElementById("subInfraOT").textContent = inr(infraOT);
       document.getElementById("subInfraM").textContent = inr(infraM);
       document.getElementById("subDmM").textContent = inr(dmM);
